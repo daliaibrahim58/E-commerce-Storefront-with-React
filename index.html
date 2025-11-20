@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eco Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <h1 class="logo">EcoMarket</h1>
+        <button id="openSearch" class="search-btn">🔍</button>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h1 class="main-title">Sustainable <br><span class="highlight">Living Made</span> <br><span>Simple</span></h1>
+            
+            <p class="hero-p">
+                Discover eco-friendly products that make a difference. From bamboo essentials to organic skincare, shop mindfully and reduce your environmental footprint.
+            </p>
+
+            <div class="hero-btns">
+                <button class="primary">Shop Now</button>
+                <button class="secondary">Learn More</button>
+            </div>
+        </div>
+
+        <div class="hero-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1589365354848-78104c17f92d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlY28lMjBmcmllbmRlySUyMHN1c3RhaW5hYmxlJTIwcHJvZHVjdHN8ZW58MXx8fHwxNzU5NzcwMzMzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" class="hero-img" alt="Hands holding bamboo cotton swabs, symbolizing eco-friendly products" />
+        </div>
+    </section>
+
+    <div id="searchModal" class="modal">
+        <div class="modal-box">
+
+            <span id="closeSearch" class="close">&times;</span>
+
+            <h2>Search Products</h2>
+
+            <div class="search-row">
+                <input type="text" placeholder="Search eco-friendly products..." />
+                <button class="primary small">Search</button>
+            </div>
+
+            <p class="popular">Popular searches:</p>
+
+            <div class="tags">
+                <span>Bamboo</span>
+                <span>Organic</span>
+                <span>Zero Waste</span>
+                <span>Sustainable Fashion</span>
+            </div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>

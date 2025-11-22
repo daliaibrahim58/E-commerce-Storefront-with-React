@@ -1,236 +1,134 @@
-import {
-  getRedirectResult,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signInWithRedirect,
-} from "firebase/auth";
-import { useEffect, useState } from "react";
-import { auth, googleProvider, githubProvider } from "../firebase/auth";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { signInWithEmailAndPassword, signInWithRedirect } from "firebase/auth";
+import { auth, googleProvider } from "../firebase/auth";
+import logo from "../assets/logo-google.png";
 
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Divider,
-  FormControl,
-  InputLabel,
-  FilledInput,
-  InputAdornment,
-  IconButton,
-} from "@mui/material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import LockIcon from "@mui/icons-material/Lock";
-import EmailIcon from "@mui/icons-material/Email";
-
-const PRIMARY_GREEN = "#00A53E";
-
-function SignIn() {
+const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({ email: "", password: "" });
 
-  // --- UI Handlers ---
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (e) => e.preventDefault();
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidPassword = (password) =>
+    /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
 
-  // --- Firebase Logic ---
-  useEffect(() => {
-    const redirectFlag = sessionStorage.getItem("redirectPending");
-    if (!redirectFlag) return;
+  const handleSignin = async () => {
+    let valid = true;
+    const newErrors = { email: "", password: "" };
 
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result === null) return;
-        console.log("Redirect login detected!", result.user);
-      })
-      .catch(console.error);
-
-    return () => {
-      sessionStorage.removeItem("redirectPending");
-    };
-  }, []);
-
-  const handleSignIn = () => {
-    if (!email || !password) {
-      console.log("Please enter both email and password");
-      return;
+    if (!email) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!isValidEmail(email)) {
+      newErrors.email = "Please enter a valid email";
+      valid = false;
     }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log("User Signed In:", userCredential.user);
-      })
-      .catch((error) => {
-        console.error("Error:", error.code, error.message);
-      });
+    if (!password) {
+      newErrors.password = "Password is required";
+      valid = false;
+    } else if (!isValidPassword(password)) {
+      newErrors.password =
+        "Password must be at least 8 characters and include a number";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    if (!valid) return;
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      console.log(userCredential);
+      setEmail("");
+      setPassword("");
+      setErrors({ email: "", password: "" });
+      alert("Sign in successful!");
+    } catch (error) {
+      console.error(error);
+      if (error.code === "auth/user-not-found") {
+        setErrors((prev) => ({ ...prev, email: "User not found" }));
+      } else if (error.code === "auth/wrong-password") {
+        setErrors((prev) => ({ ...prev, password: "Wrong password" }));
+      } else {
+        alert("Error signing in: " + error.message);
+      }
+    }
   };
 
-  const handleGoogleSignup = () => {
+  const handleGoogleSignIn = () => {
     sessionStorage.setItem("redirectPending", "true");
     signInWithRedirect(auth, googleProvider);
   };
 
-  const handleGithubSignup = () => {
-    signInWithPopup(auth, githubProvider)
-      .then((result) => console.log("GitHub User:", result.user))
-      .catch(console.error);
-  };
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        py: 4,
-      }}
-    >
-      <Paper
-        elevation={4}
-        sx={{
-          maxWidth: 500,
-          width: "100%",
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-      >
-        <Typography variant="h4" align="center">
-          Sign In
-        </Typography>
-        <Typography variant="subtitle1" align="center" color="text.secondary">
-          Welcome back! Please enter your details.
-        </Typography>
+    <div className="flex justify-center items-center min-h-screen">
+      <section className="bg-white p-10 rounded-lg shadow-lg w-96 sm:w-md">
+        <h2 className="text-2xl font-bold text-gray-800">Sign In</h2>
+        <p className="text-gray-500 mt-1">
+          Welcome back! Enter your credentials to log in.
+        </p>
 
-        <Box component="form" noValidate sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* Email */}
-          <TextField
-            fullWidth
-            label="Email"
-            variant="filled"
-            onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {/* Password */}
-          <FormControl fullWidth variant="filled">
-            <InputLabel>Password</InputLabel>
-            <FilledInput
-              type={showPassword ? "text" : "password"}
-              onChange={(e) => setPassword(e.target.value)}
-              startAdornment={
-                <InputAdornment position="start">
-                  <LockIcon />
-                </InputAdornment>
-              }
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
+        <form className="mt-6 flex flex-col gap-6">
+          <label className="flex flex-col">
+            <span className="font-medium text-gray-700 mb-2">Email</span>
+            <input
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@mail.com"
+              className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </FormControl>
+            {errors.email && (
+              <span className="text-red-500 text-sm">{errors.email}</span>
+            )}
+          </label>
 
-          {/* Forgot Password */}
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button sx={{ color: PRIMARY_GREEN, textTransform: "none" }}>Forgot Password?</Button>
-          </Box>
+          <label className="flex flex-col">
+            <span className="font-medium text-gray-700 mb-2">Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="********"
+              className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.password && (
+              <span className="text-red-500 text-sm">{errors.password}</span>
+            )}
+          </label>
 
-          {/* Sign In Button */}
-          <Button
-            onClick={handleSignIn}
-            variant="contained"
-            sx={{
-              bgcolor: PRIMARY_GREEN,
-              py: 1.5,
-              fontSize: "1.2rem",
-              width: "100%",
-              borderRadius: "12px",
-              "&:hover": { bgcolor: "#00912F" },
-            }}
+          <button
+            type="button"
+            onClick={handleSignin}
+            className="w-full bg-black! hover:bg-gray-900 hover:border-none! hover:outline-none! text-white py-2 rounded mt-2"
           >
             Sign In
-          </Button>
-        </Box>
+          </button>
 
-        {/* Divider */}
-        <Divider sx={{ width: "100%", my: 1 }}>
-          <Typography color="text.secondary">Or continue with</Typography>
-        </Divider>
-
-        {/* Social Login */}
-        <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
-          <Button
-            onClick={handleGoogleSignup}
-            variant="outlined"
-            fullWidth
-            sx={{
-              color: "black",
-              borderColor: "#BCACAC",
-              py: 1.2,
-              fontSize: "1rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="w-full border border-gray-300 hover:bg-gray-100 flex items-center justify-center gap-2 py-2 rounded mt-2"
           >
-            <Box
-              component="img"
-              src="/google.png"
-              alt="google"
-              sx={{ width: 24, height: 24, mr: 1, transform: "rotate(90deg)" }}
-            />
+            <img src={logo} alt="google" className="h-6 w-6" /> Sign in with
             Google
-          </Button>
+          </button>
 
-          <Button
-            onClick={handleGithubSignup}
-            variant="outlined"
-            fullWidth
-            sx={{
-              color: "black",
-              borderColor: "#BCACAC",
-              py: 1.2,
-              fontSize: "1rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Box component="img" src="/github.png" alt="github" sx={{ width: 24, height: 24, mr: 1 }} />
-            GitHub
-          </Button>
-        </Box>
-
-        {/* Sign Up Prompt */}
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <Typography color="text.secondary" sx={{ mr: 1 }}>
-            Don't have an account?
-          </Typography>
-          <Link to="/signup" style={{ textDecoration: "none" }}>
-            <Button sx={{ color: PRIMARY_GREEN, p: 0 }}>Sign Up</Button>
-          </Link>
-        </Box>
-      </Paper>
-    </Box>
+          <p className="text-gray-500 text-center mt-4">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-500 font-medium">
+              Sign Up
+            </Link>
+          </p>
+        </form>
+      </section>
+    </div>
   );
-}
+};
 
 export default SignIn;

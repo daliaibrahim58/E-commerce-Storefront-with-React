@@ -256,7 +256,7 @@ function ContactUs() {
           {/* Form Structure (Simulating Grid with Flex) */}
           <form>
             {/* First Row: Name + Email */}
-            <div style={styles.formRow}>
+            <div style={styles.formRow} className="flex flex-col md:flex-row">
               <div style={styles.formGroup}>
                 <label style={styles.label} htmlFor="fullName">
                   Full Name *

@@ -7,7 +7,7 @@ import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import Navbar from "./components/Navbar";
-import { useState } from "react";
+
 
 
 const mockProducts = [
@@ -284,43 +284,15 @@ const mockProducts = [
 
 
 const App = () => {
-  // const [cartItems, setCartItems] = useState([]);
-  // const [isCartOpen, setIsCartOpen] = useState(false);
+
   const onViewDetails =(product) =>{
     alert(`Viewing details for ${product.name}`)
   }
   const addToCart = (product) => {
-    // setCartItems(prev => {
-    //   const existingItem = prev.find(item => item.id === product.id);
-    //   if (existingItem) {
-    //     return prev.map(item =>
-    //       item.id === product.id
-    //         ? { ...item, quantity: item.quantity + 1 }
-    //         : item
-    //     );
-    //   }
-    //   return [...prev, { ...product, quantity: 1 }];
-    // });
+
     alert(`Added ${product.name} to cart`);
   };
 
-  //   const updateQuantity = (id, quantity) => {
-  //   if (quantity === 0) {
-  //     removeFromCart(id);
-  //     return;
-  //   }
-  //   setCartItems(prev =>
-  //     prev.map(item =>
-  //       item.id === id ? { ...item, quantity } : item
-  //     )
-  //   );
-  // };
-
-  // const removeFromCart = (id) => {
-  //   setCartItems(prev => prev.filter(item => item.id !== id));
-  // };
-
-  // const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   return (
     <>
       <Navbar />

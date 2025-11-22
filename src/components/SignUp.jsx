@@ -1,46 +1,25 @@
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithRedirect,
-  signInWithPopup,
   getRedirectResult,
 } from "firebase/auth";
-import { auth, googleProvider, githubProvider } from "../firebase/auth";
-import { Link } from "react-router-dom";
+import { auth, googleProvider } from "../firebase/auth";
+import logo from "../assets/logo-google.png";
 
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Divider,
-  FormControl,
-  InputLabel,
-  FilledInput,
-  InputAdornment,
-  IconButton,
-} from "@mui/material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import LockIcon from "@mui/icons-material/Lock";
-import EmailIcon from "@mui/icons-material/Email";
-
-const PRIMARY_GREEN = "#00A53E";
-
-function Signup() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+const SignUp = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmedPassword, setConfirmedPassword] = useState("");
-  const [passwordMatch, setPasswordMatch] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+  const [agree, setAgree] = useState(false);
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    checkbox: "",
+  });
 
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (e) => e.preventDefault();
-
-  // Minimal useEffect for redirect handling
   useEffect(() => {
     const redirectFlag = sessionStorage.getItem("redirectPending");
     if (!redirectFlag) return;
@@ -48,248 +27,168 @@ function Signup() {
     return () => sessionStorage.removeItem("redirectPending");
   }, []);
 
-  // Validation functions (kept for functionality)
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPassword = (password) =>
     /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
 
-  // Form submission handlers (kept for functionality)
-  const handleSignup = () => {
-    if (
-      !isValidEmail(email) ||
-      !isValidPassword(password) ||
-      !passwordMatch ||
-      !firstName ||
-      !lastName
-    )
-      return;
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(console.log)
-      .catch(console.error);
+  const handleSignup = async () => {
+    let valid = true;
+    const newErrors = { name: "", email: "", password: "", checkbox: "" };
+
+    if (!name) {
+      newErrors.name = "Name is required";
+      valid = false;
+    }
+    if (!email) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!isValidEmail(email)) {
+      newErrors.email = "Please enter a valid email";
+      valid = false;
+    }
+    if (!password) {
+      newErrors.password = "Password is required";
+      valid = false;
+    } else if (!isValidPassword(password)) {
+      newErrors.password =
+        "Password must be at least 8 characters and include a number";
+      valid = false;
+    }
+    if (!agree) {
+      newErrors.checkbox = "You must agree to Terms and Conditions";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    if (!valid) return;
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      console.log(userCredential);
+      setName("");
+      setEmail("");
+      setPassword("");
+      setAgree(false);
+      setErrors({ name: "", email: "", password: "", checkbox: "" });
+      alert("Signup successful!");
+      await auth.signOut();
+    } catch (error) {
+      console.error(error);
+      if (error.code === "auth/email-already-in-use") {
+        setErrors((prev) => ({ ...prev, email: "Email is already in use" }));
+      } else if (error.code === "auth/invalid-email") {
+        setErrors((prev) => ({ ...prev, email: "Invalid email address" }));
+      } else if (error.code === "auth/weak-password") {
+        setErrors((prev) => ({ ...prev, password: "Password is too weak" }));
+      } else {
+        alert("Error signing up: " + error.message);
+      }
+    }
   };
+
   const handleGoogleSignup = () => {
     sessionStorage.setItem("redirectPending", "true");
     signInWithRedirect(auth, googleProvider);
   };
-  const handleGithubSignup = () => {
-    signInWithPopup(auth, githubProvider)
-      .then(console.log)
-      .catch(console.error);
-  };
-  const isPasswordMatch = (e) => {
-    const value = e.target.value;
-    setConfirmedPassword(value);
-    setPasswordMatch(value === password);
-  };
 
   return (
-    // START: Centering Wrapper Box
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center", // Horizontal centering
-        alignItems: "center", // Vertical centering
-        minHeight: "100vh", // Full viewport height
-        py: 4, // Padding for small screens
-      }}
-    >
-      <Paper
-        elevation={4}
-        sx={{
-          maxWidth: 800,
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Typography variant="h4" align="center">
-          Create Account
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          align="center"
-          color="text.secondary"
-          sx={{ mb: 2 }}
-        >
-          Enter your details to get started
-        </Typography>
+    <div className="flex justify-center items-center min-h-screen">
+      <section className="bg-white p-10 rounded-lg shadow-lg w-96 sm:w-md">
+        <h2 className="text-2xl font-bold text-gray-800">Sign Up</h2>
+        <p className="text-gray-500 mt-1">
+          Nice to meet you! Enter your details to register.
+        </p>
 
-        <Box
-          component="form"
-          noValidate
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        >
-          {/* First & Last Name */}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              fullWidth
-              label="First Name"
-              variant="filled"
-              onChange={(e) => setFirstName(e.target.value)}
+        <form className="mt-6 flex flex-col gap-6">
+          <label className="flex flex-col">
+            <span className="font-medium text-gray-700 mb-2">Name</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="userName"
+              className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <TextField
-              fullWidth
-              label="Last Name"
-              variant="filled"
-              onChange={(e) => setLastName(e.target.value)}
-            />
-          </Box>
-
-          {/* Email */}
-          <TextField
-            fullWidth
-            label="Email"
-            variant="filled"
-            onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {/* Passwords */}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            {/* Password */}
-            <FormControl fullWidth variant="filled">
-              <InputLabel>Password</InputLabel>
-              <FilledInput
-                type={showPassword ? "text" : "password"}
-                onChange={(e) => setPassword(e.target.value)}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <LockIcon />
-                  </InputAdornment>
-                }
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-
-            {/* Confirm Password */}
-            <FormControl
-              fullWidth
-              variant="filled"
-              error={confirmedPassword && !passwordMatch}
-            >
-              <InputLabel>Confirm Password</InputLabel>
-              <FilledInput
-                type={showPassword ? "text" : "password"}
-                value={confirmedPassword}
-                onChange={isPasswordMatch}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <LockIcon />
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-          </Box>
-
-          {/* Feedback / Forgot Password */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              minHeight: 20,
-            }}
-          >
-            {confirmedPassword && !passwordMatch ? (
-              <Typography color="error" variant="caption">
-                Passwords do not match
-              </Typography>
-            ) : confirmedPassword && passwordMatch ? (
-              <Typography color="green" variant="caption">
-                Passwords match
-              </Typography>
-            ) : (
-              <Box />
+            {errors.name && (
+              <span className="text-red-500 text-sm">{errors.name}</span>
             )}
-            <Button sx={{ color: PRIMARY_GREEN, textTransform: "none" }}>
-              Forgot Password?
-            </Button>
-          </Box>
+          </label>
 
-          {/* Create Account Button */}
-          <Button
+          <label className="flex flex-col">
+            <span className="font-medium text-gray-700 mb-2">Email</span>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@mail.com"
+              className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.email && (
+              <span className="text-red-500 text-sm">{errors.email}</span>
+            )}
+          </label>
+
+          <label className="flex flex-col">
+            <span className="font-medium text-gray-700 mb-2">Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="********"
+              className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.password && (
+              <span className="text-red-500 text-sm">{errors.password}</span>
+            )}
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={() => setAgree(!agree)}
+              className="h-4 w-4"
+            />
+            <span className="text-gray-700 text-sm">
+              I agree to{" "}
+              <a href="#" className="text-blue-500">
+                Terms and Conditions
+              </a>
+            </span>
+          </label>
+          {errors.checkbox && (
+            <span className="text-red-500 text-sm">{errors.checkbox}</span>
+          )}
+
+          <button
+            type="button"
             onClick={handleSignup}
-            variant="contained"
-            sx={{ bgcolor: PRIMARY_GREEN }}
+            className="w-full bg-black! hover:bg-gray-900 hover:border-none! hover:outline-none! text-white py-2 rounded mt-2"
           >
-            Create Account
-          </Button>
-        </Box>
+            Sign Up
+          </button>
 
-        {/* Divider */}
-        <Divider sx={{ width: "100%", my: 1 }}>
-          <Typography color="text.secondary">Or continue with</Typography>
-        </Divider>
-
-        {/* Social Login */}
-        <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
-          <Button
+          <button
+            type="button"
             onClick={handleGoogleSignup}
-            variant="outlined"
-            fullWidth
-            sx={{ color: "black", borderColor: "#BCACAC" }}
+            className="w-full border border-gray-300 hover:bg-gray-100 flex items-center justify-center gap-2 py-2 rounded mt-2"
           >
-            <Box
-              component="img"
-              src="/google.png"
-              alt="google"
-              sx={{
-                width: 20,
-                height: 20,
-                mr: 1,
-                transform: "rotate(90deg)", // Rotate the image 90 degrees
-              }}
-            />
+            <img src={logo} alt="google" className="h-6 w-6" /> Sign up with
             Google
-          </Button>
-          <Button
-            onClick={handleGithubSignup}
-            variant="outlined"
-            fullWidth
-            sx={{ color: "black", borderColor: "#BCACAC" }}
-          >
-            <Box
-              component="img"
-              src="/github.png"
-              alt="github"
-              sx={{ width: 20, height: 20, mr: 1 }}
-            />
-            GitHub
-          </Button>
-        </Box>
+          </button>
 
-        {/* Login Prompt */}
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-          <Typography color="text.secondary" sx={{ mr: 1 }}>
-            Already have an account?
-          </Typography>
-          {/* Navigate to Sign In */}
-          <Link to="/signin" style={{ textDecoration: "none" }}>
-            <Button variant="text" sx={{ color: PRIMARY_GREEN }}>
+          <p className="text-gray-500 text-center mt-4">
+            Already have an account?{" "}
+            <Link to="/signin" className="text-blue-500 font-medium">
               Sign In
-            </Button>
-          </Link>
-        </Box>
-      </Paper>
-    </Box>
-    // END: Centering Wrapper Box
+            </Link>
+          </p>
+        </form>
+      </section>
+    </div>
   );
-}
+};
 
-export default Signup;
+export default SignUp;

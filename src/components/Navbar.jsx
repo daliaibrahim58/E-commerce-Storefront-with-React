@@ -88,7 +88,7 @@ const ProfileMenu = ({ handleLogout, userName }) => {
   );
 };
 
-const Navbar = () => {
+const Navbar = ({ cartCount, onCartClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isLoggedIn, userName, role, setAuth } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -131,9 +131,20 @@ const Navbar = () => {
               <div className="p-2 rounded-md hover:bg-gray-300/30 transition-colors duration-200 cursor-pointer">
                 <IoSearchOutline className="w-5 h-5 text-gray-700" />
               </div>
-              <div className="p-2 rounded-md hover:bg-gray-300/30 transition-colors duration-200 cursor-pointer">
-                <IoCartOutline className="w-5 h-5 text-gray-700" />
-              </div>
+              <div className="relative p-2 rounded-md hover:bg-gray-300/30 transition-colors duration-200 cursor-pointer"
+                  onClick={onCartClick}
+                >
+                  <IoCartOutline className="w-5 h-5 text-gray-700" />
+
+                  {/* Badge */}
+                  {cartCount > 0 && (
+                    <div className="absolute -top-1 -right-1 inline-flex items-center justify-center 
+                                    w-5 h-5 text-[10px] font-bold text-white bg-red-500 
+                                    border-2 border-white rounded-full">
+                      {cartCount}
+                    </div>
+                  )}
+                </div>
               {isLoggedIn ? (
                 <ProfileMenu handleLogout={handleLogout} userName={userName} />
               ) : (

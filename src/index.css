@@ -1,4 +1,4 @@
+@import "@material-tailwind/react/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "@material-tailwind/react/tailwind.css";

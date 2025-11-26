@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "../App";
 import {
   Button,
   IconButton,
@@ -11,10 +13,12 @@ import {
   IoRemove,
   IoClose
 } from "react-icons/io5";
+
 // Separator component
 function MTSeparator() {
   return <div className="w-full h-px bg-gray-200 my-3" />;
 }
+
 // Image component with fallback
 function MTImage({ src, alt, className }) {
   const [error, setError] = useState(false);
@@ -28,6 +32,7 @@ function MTImage({ src, alt, className }) {
     />
   );
 }
+
 // Drawer component
 function MTDrawer({ open, onClose, title, children }) {
   return (
@@ -63,12 +68,77 @@ function MTDrawer({ open, onClose, title, children }) {
     </>
   );
 }
-const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem , setCartItems}) => {
+
+const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, setCartItems }) => {
+  const { userName, isLoggedIn } = useContext(AuthContext);
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
   const tax = subtotal * 0.1; // Assuming 10% tax
   const total = subtotal + tax;
+
+  const handleCheckout = async () => {
+    if (!isLoggedIn) {
+      alert("Please login to checkout");
+      return;
+    }
+
+    try {
+      // Validate stock for all items
+      const stockValidation = await Promise.all(
+        items.map(async (item) => {
+          try {
+            const productResponse = await axios.get(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`);
+            const currentProduct = productResponse.data;
+            const availableStock = currentProduct.stock || 0;
+            
+            if (item.quantity > availableStock) {
+              return {
+                valid: false,
+                productName: item.name,
+                requested: item.quantity,
+                available: availableStock
+              };
+            }
+            return { valid: true };
+          } catch (error) {
+            console.error(`Error checking stock for product ${item.id}:`, error);
+            return { valid: false, productName: item.name, error: true };
+          }
+        })
+      );
+
+      // Check if any item failed validation
+      const invalidItem = stockValidation.find(v => !v.valid);
+      if (invalidItem) {
+        if (invalidItem.error) {
+          alert(`Error checking stock for ${invalidItem.productName}. Please try again.`);
+        } else {
+          alert(`Cannot checkout: ${invalidItem.productName} has only ${invalidItem.available} items in stock, but you requested ${invalidItem.requested}.`);
+        }
+        return;
+      }
+
+      // Create order with items details (stock will be reduced when status changes to Delivered)
+      const orderData = {
+        customer: userName,
+        items: items,
+        total: total,
+        date: new Date().toISOString().split('T')[0],
+        status: "Pending"
+      };
+
+      await axios.post("https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/orders", orderData);
+      
+      alert("Order placed successfully!");
+      setCartItems([]);
+      onClose();
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Failed to place order. Please try again.");
+    }
+  };
+
   return (
-     <MTDrawer
+    <MTDrawer
       open={isOpen}
       onClose={onClose}
       title={
@@ -186,12 +256,7 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem , setCart
               <Button
                fullWidth 
                color="green"
-               onClick={() => {
-                // Clear cart and close drawer on checkout
-                setCartItems([]);
-                localStorage.setItem("cartItems", JSON.stringify([]));
-                onClose();
-               }}>
+               onClick={handleCheckout}>
                 Checkout
               </Button>
 
@@ -208,7 +273,7 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem , setCart
         </>
       )}
     </MTDrawer>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;

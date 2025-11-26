@@ -7,8 +7,11 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/dashboard/Dashboard";
+import Overview from "./pages/dashboard/Overview";
 import Users from "./pages/dashboard/Users";
+import Products from "./pages/dashboard/Products";
 import Orders from "./pages/dashboard/Orders";
+import OrderedItems from "./pages/dashboard/OrderedItems";
 import Notfound from "./pages/Notfound";
 import Footer from "./components/Footer";
 import Cart from "./components/Cart";
@@ -271,8 +274,11 @@ const App = () => {
             )
           }
         >
+          <Route index element={<Overview />} />
           <Route path="users" element={<Users />} />
+          <Route path="products" element={<Products />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="ordered-items" element={<OrderedItems />} />
         </Route>
 
         <Route path="*" element={<Notfound />} />

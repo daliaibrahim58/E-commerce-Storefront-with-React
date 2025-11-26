@@ -1,6 +1,7 @@
 import Details from "../Productpage/Detials";
 import ProductCard from "../Productpage/ProductCard";
 import { TfiFilter } from "react-icons/tfi";
+
 const Products = ({ 
   products = [], 
   handleAddToCart, 
@@ -19,17 +20,15 @@ const Products = ({
     );
   }
 
+  const discountedProducts = products.filter(
+    (product) => 
+      product.isSale === true || 
+      (product.tags && product.tags.some(tag => tag.includes("%")))
+  );
 
-const discountedProducts = products.filter(
-  (product) => 
-    product.isSale === true || 
-    product.tags.some(tag => tag.includes("%"))
-);
-
-const sortedDiscountedProducts = discountedProducts.sort(
-  (a, b) => Number(b.id) - Number(a.id)
-);
-
+  const sortedDiscountedProducts = discountedProducts.sort(
+    (a, b) => Number(b.id) - Number(a.id)
+  );
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 pt-8">
@@ -71,7 +70,7 @@ const sortedDiscountedProducts = discountedProducts.sort(
           </div>
         )}
       </div>
-  )
-}
+  );
+};
 
-export default Products
+export default Products;

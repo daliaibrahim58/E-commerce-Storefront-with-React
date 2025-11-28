@@ -22,8 +22,9 @@ const Products = ({
 
   const discountedProducts = products.filter(
     (product) => 
-      product.isSale === true || 
-      (product.tags && product.tags.some(tag => tag.includes("%")))
+      product.inStock === true &&
+      (product.isSale === true || 
+      (product.tags && product.tags.some(tag => tag.includes("%"))))
   );
 
   const sortedDiscountedProducts = discountedProducts.sort(

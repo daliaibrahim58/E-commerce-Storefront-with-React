@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTrash, FaEdit, FaUserPlus, FaTimes } from "react-icons/fa";
+import { API_URLS } from "../../api/config";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -13,7 +14,7 @@ const Users = () => {
     role: "User", // Default role
   });
 
-  const API_URL = "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/users";
+  const API_URL = API_URLS.USERS;
 
   const fetchUsers = async () => {
     setLoading(true);

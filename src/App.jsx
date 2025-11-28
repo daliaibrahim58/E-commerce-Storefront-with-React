@@ -12,12 +12,14 @@ import Users from "./pages/dashboard/Users";
 import Products from "./pages/dashboard/Products";
 import Orders from "./pages/dashboard/Orders";
 import OrderedItems from "./pages/dashboard/OrderedItems";
+import Carts from "./pages/dashboard/Carts";
 import Notfound from "./pages/Notfound";
 import Footer from "./components/Footer";
 import Cart from "./components/Cart";
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Alert } from "@material-tailwind/react";
+import { API_URLS } from "./api/config";
 export const AuthContext = createContext();
 
 const App = () => {
@@ -62,9 +64,7 @@ const App = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items"
-        );
+        const res = await axios.get(API_URLS.PRODUCTS);
         const data = await res.data;
 
         setProducts(data);
@@ -279,6 +279,7 @@ const App = () => {
           <Route path="products" element={<Products />} />
           <Route path="orders" element={<Orders />} />
           <Route path="ordered-items" element={<OrderedItems />} />
+          <Route path="carts" element={<Carts />} />
         </Route>
 
         <Route path="*" element={<Notfound />} />

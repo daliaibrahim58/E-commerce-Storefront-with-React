@@ -4,6 +4,7 @@ import { Typography, Input, Button } from "@material-tailwind/react";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import axios from 'axios';
 import { AuthContext } from '../App';
+import { API_URLS } from "../api/config";
 
 const LoginPage = () => {
   const { setAuth } = useContext(AuthContext);
@@ -40,7 +41,7 @@ const LoginPage = () => {
     }
     if (!isValid) return;
 
-    const url = "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/users";
+    const url = API_URLS.USERS;
 
     try {
       const response = await axios.get(url);

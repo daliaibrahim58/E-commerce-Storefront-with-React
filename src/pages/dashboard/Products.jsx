@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
+import { API_URLS } from "../../api/config";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -8,7 +9,7 @@ const Products = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Default state for a new product
+    // Default state for a new product
   const initialProductState = {
     name: "",
     category: "",
@@ -19,18 +20,19 @@ const Products = () => {
     description: "",
     isEcoFriendly: false,
     isNew: false,
+    inStock: true, // Controls visibility
     // Defaults for fields without inputs
-    rating: 0,
+    rating: 4,
     reviews: 0,
     tags: [],
-    features: [],
+    features: ["Eco-Friendly", "Sustainable"],
     salePrice: "",
     isSale: false,
   };
 
   const [currentProduct, setCurrentProduct] = useState(initialProductState);
 
-  const API_URL = "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items";
+  const API_URL = API_URLS.PRODUCTS;
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -75,6 +77,7 @@ const Products = () => {
       // Ensure booleans are booleans
       isEcoFriendly: !!product.isEcoFriendly,
       isNew: !!product.isNew,
+      inStock: product.inStock !== undefined ? !!product.inStock : true,
     });
     setIsModalOpen(true);
   };
@@ -104,10 +107,11 @@ const Products = () => {
         salePrice: price, // Sync salePrice with price
         isSale,
         tags,
+        isVisible: currentProduct.inStock, // Sync isVisible with inStock
         // Ensure defaults for other fields
-        rating: currentProduct.rating || 0,
+        rating: currentProduct.rating || 4,
         reviews: currentProduct.reviews || 0,
-        features: currentProduct.features || [],
+        features: currentProduct.features && currentProduct.features.length > 0 ? currentProduct.features : ["Eco-Friendly", "Sustainable"],
       };
 
       if (isEditing) {
@@ -164,6 +168,7 @@ const Products = () => {
               <th className="p-4 border-b">Price</th>
               <th className="p-4 border-b">Category</th>
               <th className="p-4 border-b">Stock</th>
+              <th className="p-4 border-b">Status</th>
               <th className="p-4 border-b text-right">Actions</th>
             </tr>
           </thead>
@@ -199,7 +204,18 @@ const Products = () => {
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {product.stock || 0} In Stock
+                    {product.stock || 0} Units
+                  </span>
+                </td>
+                <td className="p-4 border-b">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      product.inStock
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {product.inStock ? "Visible" : "Hidden"}
                   </span>
                 </td>
                 <td className="p-4 border-b text-right">
@@ -307,7 +323,7 @@ const Products = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Stock
+                  Stock Quantity
                 </label>
                 <input
                   type="number"
@@ -343,7 +359,17 @@ const Products = () => {
                 />
               </div>
 
-              <div className="mb-4 flex gap-6">
+              <div className="mb-4 flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="inStock"
+                    checked={currentProduct.inStock}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-gray-700 text-sm font-bold">Visible (In Stock)</span>
+                </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"

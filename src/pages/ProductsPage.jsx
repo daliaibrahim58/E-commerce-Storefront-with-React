@@ -16,13 +16,14 @@ export function ProductsPage({ products = [], loadingProducts, handleAddToCart, 
   //filter products based on search term
   useEffect(() => {
     if (!searchTerm) {
-      setSearchFiltered(products);
+      setSearchFiltered(products.filter(p => p.inStock === true));
       return;
     }
     const filtered = products.filter((product) =>
-      product.name.toLowerCase().includes(searchTerm) ||
+      product.inStock === true &&
+      (product.name.toLowerCase().includes(searchTerm) ||
       product.description.toLowerCase().includes(searchTerm) ||
-      product.category.toLowerCase().includes(searchTerm)
+      product.category.toLowerCase().includes(searchTerm))
     );
     setSearchFiltered(filtered);
   }, [searchTerm, products]);

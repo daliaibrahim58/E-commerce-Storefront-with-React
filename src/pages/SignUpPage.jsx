@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import axios from 'axios';
+import { API_URLS } from "../api/config";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -53,13 +54,13 @@ const SignUpPage = () => {
       setSubmitError("You must agree to Terms and Conditions");
       isValid = false;
     }
-
+    
     if (!isValid) return;
 
- try {
+    try {
       // check if email already exists
       const { data: existingUsers } = await axios.get(
-        "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/users"
+        API_URLS.USERS
       );
 
       const emailUsed = existingUsers.some(user => user.email.toLowerCase() === email.toLowerCase());
@@ -77,7 +78,7 @@ const SignUpPage = () => {
       };
 
       await axios.post(
-        "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/users",
+        API_URLS.USERS,
         postData
       );
       navigate("/login");

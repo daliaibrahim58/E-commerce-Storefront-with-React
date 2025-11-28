@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaUsers, FaBoxOpen, FaClipboardList, FaShoppingBag } from "react-icons/fa";
+import { API_URLS } from "../../api/config";
 
 const Overview = () => {
   const [stats, setStats] = useState({
@@ -15,9 +16,9 @@ const Overview = () => {
     const fetchData = async () => {
       try {
         const [usersRes, productsRes, ordersRes] = await Promise.all([
-          axios.get("https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/users"),
-          axios.get("https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items"),
-          axios.get("https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/orders"),
+          axios.get(API_URLS.USERS),
+          axios.get(API_URLS.PRODUCTS),
+          axios.get(API_URLS.ORDERS),
         ]);
 
         // Calculate total ordered items from all orders

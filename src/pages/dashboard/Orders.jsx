@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 import { FaEye, FaTimes } from "react-icons/fa";
+import { API_URLS } from "../../api/config";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -8,7 +9,7 @@ const Orders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
 
-  const API_URL = "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/orders";
+  const API_URL = API_URLS.ORDERS;
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -52,11 +53,11 @@ const Orders = () => {
           // Reduce stock for each item in the order
           const stockUpdatePromises = currentOrder.items?.map(async (item) => {
             try {
-              const productResponse = await axios.get(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`);
+              const productResponse = await axios.get(`${API_URLS.PRODUCTS}/${item.id}`);
               const currentProduct = productResponse.data;
               const newStock = Math.max(0, (currentProduct.stock || 0) - item.quantity);
               
-              await axios.put(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`, {
+              await axios.put(`${API_URLS.PRODUCTS}/${item.id}`, {
                 ...currentProduct,
                 stock: newStock
               });
@@ -87,11 +88,11 @@ const Orders = () => {
           if (wasDelivered) {
             const stockRestorePromises = currentOrder.items?.map(async (item) => {
               try {
-                const productResponse = await axios.get(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`);
+                const productResponse = await axios.get(`${API_URLS.PRODUCTS}/${item.id}`);
                 const currentProduct = productResponse.data;
                 const restoredStock = (currentProduct.stock || 0) + item.quantity;
                 
-                await axios.put(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`, {
+                await axios.put(`${API_URLS.PRODUCTS}/${item.id}`, {
                   ...currentProduct,
                   stock: restoredStock
                 });

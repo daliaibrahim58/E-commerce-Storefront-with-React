@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTrash } from "react-icons/fa";
+import { API_URLS } from "../../api/config";
 
 const OrderedItems = () => {
   const [orderedItems, setOrderedItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const ORDERS_URL = "https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/orders";
+  const ORDERS_URL = API_URLS.ORDERS;
 
   const fetchOrderedItems = async () => {
     setLoading(true);
@@ -68,11 +69,11 @@ const OrderedItems = () => {
         if (wasDelivered) {
           const stockRestorePromises = fullOrder.items?.map(async (item) => {
             try {
-              const productResponse = await axios.get(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`);
+              const productResponse = await axios.get(`${API_URLS.PRODUCTS}/${item.id}`);
               const currentProduct = productResponse.data;
               const restoredStock = (currentProduct.stock || 0) + item.quantity;
               
-              await axios.put(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`, {
+              await axios.put(`${API_URLS.PRODUCTS}/${item.id}`, {
                 ...currentProduct,
                 stock: restoredStock
               });

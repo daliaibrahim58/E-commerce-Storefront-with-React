@@ -6,6 +6,7 @@ import {
   IconButton,
   Typography
 } from "@material-tailwind/react";
+import { API_URLS } from "../api/config";
 
 import {
   IoBagOutline,
@@ -75,9 +76,37 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, setCartI
   const tax = subtotal * 0.1; // Assuming 10% tax
   const total = subtotal + tax;
 
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [address, setAddress] = useState({
+    street: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: ""
+  });
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddress(prev => ({ ...prev, [name]: value }));
+  };
+
+  const validateAddress = () => {
+    return address.street && address.city && address.state && address.zip && address.country;
+  };
+
   const handleCheckout = async () => {
     if (!isLoggedIn) {
       alert("Please login to checkout");
+      return;
+    }
+
+    if (!showAddressForm) {
+      setShowAddressForm(true);
+      return;
+    }
+
+    if (!validateAddress()) {
+      alert("Please fill in all address fields");
       return;
     }
 
@@ -86,7 +115,7 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, setCartI
       const stockValidation = await Promise.all(
         items.map(async (item) => {
           try {
-            const productResponse = await axios.get(`https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/items/${item.id}`);
+            const productResponse = await axios.get(`${API_URLS.PRODUCTS}/${item.id}`);
             const currentProduct = productResponse.data;
             const availableStock = currentProduct.stock || 0;
             
@@ -123,13 +152,16 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, setCartI
         items: items,
         total: total,
         date: new Date().toISOString().split('T')[0],
-        status: "Pending"
+        status: "Pending",
+        address: address // Include address in the payload
       };
 
-      await axios.post("https://be4dc6ae-aa83-48a5-a3ca-8f2474a803f6-00-2bqlvnxatc3lz.spock.replit.dev/orders", orderData);
+      await axios.post(API_URLS.ORDERS, orderData);
       
       alert("Order placed successfully!");
       setCartItems([]);
+      setShowAddressForm(false);
+      setAddress({ street: "", city: "", state: "", zip: "", country: "" });
       onClose();
     } catch (error) {
       console.error("Error placing order:", error);
@@ -140,11 +172,14 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, setCartI
   return (
     <MTDrawer
       open={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        setShowAddressForm(false);
+        onClose();
+      }}
       title={
         <>
           <IoBagOutline className="w-6 h-6" />
-          Shopping Cart ({items.length})
+          {showAddressForm ? "Checkout - Shipping Address" : `Shopping Cart (${items.length})`}
         </>
       }
     >
@@ -160,6 +195,90 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, setCartI
           <Button color="blue" onClick={onClose}>
             Continue Shopping
           </Button>
+        </div>
+      ) : showAddressForm ? (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
+            <input
+              type="text"
+              name="street"
+              value={address.street}
+              onChange={handleAddressChange}
+              className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="123 Main St"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+              <input
+                type="text"
+                name="city"
+                value={address.city}
+                onChange={handleAddressChange}
+                className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="New York"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+              <input
+                type="text"
+                name="state"
+                value={address.state}
+                onChange={handleAddressChange}
+                className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="NY"
+                required
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
+              <input
+                type="text"
+                name="zip"
+                value={address.zip}
+                onChange={handleAddressChange}
+                className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="10001"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+              <input
+                type="text"
+                name="country"
+                value={address.country}
+                onChange={handleAddressChange}
+                className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="USA"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="mt-8 space-y-2">
+             <Button
+               fullWidth 
+               color="green"
+               onClick={handleCheckout}>
+                Place Order
+              </Button>
+              <Button
+                fullWidth
+                variant="text"
+                color="blue-gray"
+                onClick={() => setShowAddressForm(false)}
+              >
+                Back to Cart
+              </Button>
+          </div>
         </div>
       ) : (
         <>

@@ -1,4 +1,4 @@
-import { FaRegHeart, FaShoppingCart, FaStar } from "react-icons/fa";
+import { FaShoppingCart, FaStar } from "react-icons/fa";
 import { VscPreview } from "react-icons/vsc";
 export function ProductCard({ product, handleAddToCart, onViewDetails}) {
   const discountPercentage = product.originalPrice
@@ -33,11 +33,6 @@ export function ProductCard({ product, handleAddToCart, onViewDetails}) {
             </span>
           )}
         </div>
-
-        {/* Wishlist Button */}
-        <button className="absolute top-2 right-2 bg-white/80 hover:bg-white p-1 rounded-md shadow-sm">
-          <FaRegHeart className="text-gray-900 w-4 h-4" />
-        </button>
 
         {/* Quick Add to Cart Overlay */}
         <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-300">

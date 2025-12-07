@@ -14,7 +14,7 @@ const OrderSchema = new Schema({
   address: {
     street: { type: String },
     city: { type: String },
-    state: { type: String },
+    phoneNumber: { type: String },
     zip: { type: String },
     country: { type: String },
   },

@@ -78,7 +78,7 @@ const Cart = ({
   const [address, setAddress] = useState({
     street: "",
     city: "",
-    state: "",
+    phoneNumber: "",
     zip: "",
     country: "",
   });
@@ -92,7 +92,7 @@ const Cart = ({
     return (
       address.street &&
       address.city &&
-      address.state &&
+      address.phoneNumber &&
       address.zip &&
       address.country
     );
@@ -263,7 +263,7 @@ const Cart = ({
       alert("Order placed successfully!");
       setCartItems([]);
       setShowAddressForm(false);
-      setAddress({ street: "", city: "", state: "", zip: "", country: "" });
+      setAddress({ street: "", city: "", phoneNumber: "", zip: "", country: "" });
       onClose();
       // Navigate to My Orders so user can see their order
       navigate("/my-orders");
@@ -375,15 +375,15 @@ const Cart = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                State *
+                Phone Number *
               </label>
               <input
                 type="text"
-                name="state"
-                value={address.state}
+                name="phoneNumber"
+                value={address.phoneNumber}
                 onChange={handleAddressChange}
                 className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="NY"
+                placeholder="(+20) 123456789"
                 required
               />
             </div>

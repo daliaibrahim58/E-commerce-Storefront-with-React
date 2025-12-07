@@ -406,12 +406,13 @@ const Orders = () => {
                       {currentOrder.address.street || "-"}
                     </p>
                     <p className="text-sm text-gray-700">
+                      {currentOrder.address.country || ""},{" "}
                       {currentOrder.address.city || ""},{" "}
-                      {currentOrder.address.state || ""}{" "}
                       {currentOrder.address.zip || ""}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {currentOrder.address.country || ""}
+                      Phone:
+                      {currentOrder.address.phoneNumber || ""}{" "}
                     </p>
                   </div>
                 </div>
